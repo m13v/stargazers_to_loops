@@ -6,7 +6,6 @@ from add_to_loops import add_to_loops
 
 def process_stargazer(stargazer):
     headers = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
-    logging.info(f"Stargazer request {headers}")
     user_response = requests.get(stargazer["url"], headers=headers)
     if user_response.status_code == 200:
         user_data = user_response.json()
