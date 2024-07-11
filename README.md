@@ -2,27 +2,26 @@
 
 ## Project Description
 
-`stargazers_to_loops` is a small project designed to analyze GitHub stargazers data and extract meaningful insights. This tool helps open-source project maintainers understand their community better by providing detailed statistics on user engagement.
+`stargazers_to_loops` is a small project designed to analyze GitHub stargazers data and extract meaningful insights. 
+
+This tool helps open-source project maintainers understand their community better by providing detailed statistics on user engagement.
+
+We gather all stargazers, then request profile for each one to get their e-mail address.
+We then add all users with valid email address to loops.so database
 
 ## Features
 
-- **Filter Records**: Extract specific fields such as `login` and `loops` from JSON data.
-- **Statistics**: Calculate and display the total number of records, the number of records with the `loops` field, and the distribution of unique `loops` values.
-- **User-Friendly Output**: Print the filtered data in a readable format.
-
-## Benefits to the Open Source Community
-
-- **Enhanced Community Insights**: By analyzing stargazers data, maintainers can better understand their user base and tailor their projects to meet community needs.
-- **Improved Engagement**: Detailed statistics help identify active contributors and potential collaborators.
-- **Data-Driven Decisions**: Maintainers can make informed decisions based on user engagement metrics.
+- **Get Records**: Extract specific fields such as `login` and `emails` from JSON data.
+- **Statistics**: Calculate and display the total number of records, the number of records with the `loops` field.
+- **User-Friendly Output**: Print the filtered data in a readable format in local json and upload to loop.so
 
 ## Installation
 
 1. Clone the repository:
 ````bash
-2. Navigate to the project directory:
 git clone https://github.com/yourusername/stargazers_to_loops.git
 ````
+2. Navigate to the project directory:
 ````bash
 cd stargazers_to_loops
 ````
@@ -35,19 +34,21 @@ pip install -r requirements.txt
 
 1. Place your JSON file containing stargazers data in the project directory.
 2. Run the script:
+````bash
+python main.py
 ````
-bash
-python filter_and_print.py stargazers.json
+[optionally] you can run script for a specific user: e.g. 
+````bash
+python main.py m13v
 ````
 
-## Example Output
+## Example json stats
 ````
-Total records: 100
-Records with 'loops' field: 75
-Number of records for each unique value of 'loops' field:
-1: 30
-2: 25
-3: 20
+Total records: 514
+Records with 'loops' field: 514
+Breakdown of 'loops' field:
+  added: 138
+  no valid email exist: 376
 ````
 
 ## Contributing
