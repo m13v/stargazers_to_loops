@@ -43,13 +43,21 @@ python main.py m13v
 ````
 
 ## Example json stats
+````bash
+python check_json_records.py    
 ````
+````bash
 Total records: 514
 Records with 'loops' field: 514
 Breakdown of 'loops' field:
   added: 138
   no valid email exist: 376
 ````
+
+## TO-DO
+
+- When getting stargazers don't overwrite existing
+- Get stargazer email only if it wasn't already added
 
 ## Contributing
 
