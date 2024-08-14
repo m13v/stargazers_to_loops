@@ -17,27 +17,26 @@ def process_stargazer(stargazer):
         }
         logging.info(f"User info: {user_info}")
         if user_info["url"]:
-            # logging.info("Loading existing stargazers data")
             with open('stargazers.json', 'r') as infile:
                 stargazers = json.load(infile)
             
-            # logging.info("Updating user info in stargazers data")
             for stargazer in stargazers:
                 if stargazer["url"] == user_info["url"]:
+                    if stargazer.get("loops") in ["no valid email exist", "already in loops"]:
+                        logging.info(f"Skipping user {user_info['login']} as they have no valid email or are already in Loops.")
+                        return
                     stargazer.update(user_info)
-                    # Add or update the loops field
                     if user_info["email"]:
                         if not check_user_existence_by_email(user_info["email"]):
                             add_to_loops(user_info)
                             stargazer["loops"] = "added"
                         else:
-                            stargazer["loops"] = "already exists"
+                            stargazer["loops"] = "already in loops"
                             logging.info(f"User with email {user_info['email']} already exists in Loops")
                     else:
                         stargazer["loops"] = "no valid email exist"
                         logging.warning("User does not have a valid email, skipping loops addition")
             
-            # logging.info("Saving updated stargazers data")
             with open('stargazers.json', 'w') as outfile:
                 json.dump(stargazers, outfile, indent=4)
     else:
