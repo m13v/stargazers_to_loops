@@ -1,6 +1,7 @@
 import sys
 import json
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from process_stargazer import process_stargazer
 from get_stargazers import get_stargazers  # Assuming this function exists
 
@@ -13,9 +14,14 @@ def main():
         with open('stargazers.json', 'r') as infile:
             stargazers = json.load(infile)
         
-        for stargazer in stargazers:
-            print(f"Processing stargazer: {stargazer['login']}")
-            process_stargazer(stargazer)
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(process_stargazer, stargazer): stargazer for stargazer in stargazers}
+            for future in as_completed(futures):
+                stargazer = futures[future]
+                try:
+                    future.result()
+                except Exception as e:
+                    logging.error(f"Error processing stargazer {stargazer['login']}: {e}")
         return
     
     login = sys.argv[1]
