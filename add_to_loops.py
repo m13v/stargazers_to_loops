@@ -1,6 +1,8 @@
 import requests
 import logging
 from config import LOOPS_API, LOOPS_API_KEY
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 def add_to_loops(user):
     headers = {
@@ -15,11 +17,24 @@ def add_to_loops(user):
         "userGroup": "screen-pipe-stargazers"
     }
     logging.info(f"Adding {user['email']} to Loops")
-    response = requests.post(LOOPS_API, headers=headers, json=data)
-    if response.status_code == 200:
-        logging.info(f"Added {user['login']} to Loops")
-    else:
-        logging.error(f"Error adding {user['login']} to Loops: {response.status_code}")
+    
+    session = requests.Session()
+    retry = Retry(
+        total=5,
+        backoff_factor=1,
+        status_forcelist=[500, 502, 503, 504],
+        raise_on_status=False
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
+    
+    try:
+        response = session.post(LOOPS_API, headers=headers, json=data)
+        response.raise_for_status()
+        logging.info(f"Successfully added {user['email']} to Loops")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Failed to add {user['email']} to Loops: {e}")
 
 def check_user_existence_by_email(email):
     headers = {
