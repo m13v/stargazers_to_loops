@@ -56,8 +56,8 @@ Breakdown of 'loops' field:
 
 ## TO-DO
 
-- When getting stargazers don't overwrite existing
-- Get stargazer email only if it wasn't already added
+[x] When getting stargazers don't overwrite existing
+[ ] Get stargazer email only if it wasn't already added
 
 ## Contributing
 
