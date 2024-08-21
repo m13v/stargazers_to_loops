@@ -16,6 +16,9 @@ def get_stargazers():
             existing_stargazers_dict = {stargazer['id']: stargazer for stargazer in existing_stargazers}
     except FileNotFoundError:
         existing_stargazers_dict = {}
+    except json.JSONDecodeError as e:
+        logging.error(f"Error loading stargazers.json: {e}")
+        return []
     
     while True:
         headers = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
@@ -38,7 +41,10 @@ def get_stargazers():
     stargazers = list(existing_stargazers_dict.values())
     logging.info(f"Total stargazers fetched: {len(stargazers)}")
     
-    with open('stargazers.json', 'w') as outfile:
-        json.dump(stargazers, outfile, indent=4)
+    try:
+        with open('stargazers.json', 'w') as outfile:
+            json.dump(stargazers, outfile, indent=4)
+    except Exception as e:
+        logging.error(f"Error saving stargazers.json: {e}")
     
     return stargazers
