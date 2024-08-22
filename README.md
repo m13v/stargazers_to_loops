@@ -59,6 +59,7 @@ Breakdown of 'loops' field:
 [x] When getting stargazers don't overwrite existing
 [x] Get stargazer email only if it wasn't already added
 [x] Parallel execution
+[ ] CLI interface
 
 ## Contributing
 
