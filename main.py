@@ -1,6 +1,7 @@
 import sys
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 from process_stargazer import process_stargazer
@@ -14,16 +15,23 @@ def main():
     
     if len(sys.argv) != 2:
         print("No login provided, fetching all stargazers...")
-        logging.info("Calling validate_json for stargazers.json")
-        if not validate_json('stargazers.json'):
-            logging.info("Attempting to fix JSON syntax issues...")
-            fix_json_syntax('stargazers.json')
-            if not validate_json('stargazers.json'):
-                return
         
-        stargazers = get_stargazers()
-        if not stargazers:
-            return
+        # Check if stargazers.json exists
+        if not os.path.exists('stargazers.json'):
+            logging.info("stargazers.json not found. Fetching stargazers...")
+            stargazers = get_stargazers()
+            if not stargazers:
+                return
+        else:
+            logging.info("Calling validate_json for stargazers.json")
+            if not validate_json('stargazers.json'):
+                logging.info("Attempting to fix JSON syntax issues...")
+                fix_json_syntax('stargazers.json')
+                if not validate_json('stargazers.json'):
+                    return
+            
+            with open('stargazers.json', 'r') as infile:
+                stargazers = json.load(infile)
         
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures = {executor.submit(process_stargazer, stargazer, lock): stargazer for stargazer in stargazers}
