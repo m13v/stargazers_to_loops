@@ -56,10 +56,12 @@ Breakdown of 'loops' field:
 
 ## TO-DO
 
-[x] When getting stargazers don't overwrite existing
-[x] Get stargazer email only if it wasn't already added
-[x] Parallel execution
-[ ] CLI interface
+- [x] When getting stargazers don't overwrite existing
+- [x] Get stargazer email only if it wasn't already added
+- [x] Parallel execution
+- [ ] CLIE argument for github repo
+- [ ] CLI interface
+- [ ] Check if env variables are provided
 
 ## Contributing
 
