@@ -4,16 +4,31 @@ import logging
 from config import GITHUB_TOKEN
 from add_to_loops import add_to_loops, check_user_existence_by_email
 
-def process_stargazer(stargazer, lock):
+def process_stargazers(stargazers, lock):
+    updated = False
+    for stargazer in stargazers:
+        if process_single_stargazer(stargazer):
+            updated = True
+    
+    if updated:
+        with lock:
+            try:
+                with open('stargazers.json', 'w') as outfile:
+                    json.dump(stargazers, outfile, indent=4)
+                logging.info("Updated stargazers.json after processing")
+            except Exception as e:
+                logging.error(f"Error saving stargazers.json: {e}")
+
+def process_single_stargazer(stargazer):
     # Check if the loops field indicates the user has already been processed
     if stargazer.get("loops") in ["added", "already in loops", "no valid email exist"]:
         logging.info(f"Skipping user {stargazer.get('login', 'unknown')} as they have already been processed.")
-        return
+        return False
     
     # Check if necessary fields are present before making the request
     if not stargazer.get("url"):
         logging.warning(f"Stargazer {stargazer.get('login', 'unknown')} does not have a URL, skipping.")
-        return
+        return False
     
     headers = {"Authorization": f"token {GITHUB_TOKEN}"} if GITHUB_TOKEN else {}
     user_response = requests.get(stargazer["url"], headers=headers)
@@ -27,32 +42,19 @@ def process_stargazer(stargazer, lock):
         }
         logging.info(f"User info: {user_info}")
         if user_info["url"]:
-            try:
-                with open('stargazers.json', 'r') as infile:
-                    stargazers = json.load(infile)
-            except json.JSONDecodeError as e:
-                logging.error(f"Error loading stargazers.json: {e}")
-                return
-            
-            for stargazer in stargazers:
-                if stargazer["url"] == user_info["url"]:
-                    stargazer.update(user_info)
-                    if user_info["email"]:
-                        if not check_user_existence_by_email(user_info["email"]):
-                            add_to_loops(user_info)
-                            stargazer["loops"] = "added"
-                        else:
-                            stargazer["loops"] = "already in loops"
-                            logging.info(f"User with email {user_info['email']} already exists in Loops")
-                    else:
-                        stargazer["loops"] = "no valid email exist"
-                        logging.warning("User does not have a valid email, skipping loops addition")
-            
-            try:
-                with lock:  # Ensure only one thread writes to the file at a time
-                    with open('stargazers.json', 'w') as outfile:
-                        json.dump(stargazers, outfile, indent=4)
-            except Exception as e:
-                logging.error(f"Error saving stargazers.json: {e}")
+            stargazer.update(user_info)
+            if user_info["email"]:
+                if not check_user_existence_by_email(user_info["email"]):
+                    add_to_loops(user_info)
+                    stargazer["loops"] = "added"
+                else:
+                    stargazer["loops"] = "already in loops"
+                    logging.info(f"User with email {user_info['email']} already exists in Loops")
+            else:
+                stargazer["loops"] = "no valid email exist"
+                logging.warning("User does not have a valid email, skipping loops addition")
+            return True
     else:
         logging.error(f"Error fetching user data for {stargazer['login']}: {user_response.status_code}: {user_response.text}")
+    
+    return False
