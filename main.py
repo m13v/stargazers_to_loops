@@ -4,7 +4,7 @@ import logging
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
-from process_stargazer import process_stargazer
+from process_stargazer import process_stargazers
 from get_stargazers import get_stargazers
 from fix_and_validate_json import validate_json
 from fix_and_validate_json import fix_json_syntax
@@ -63,7 +63,7 @@ def main():
     
     if stargazer:
         print(f"Processing stargazer: {stargazer['login']}")
-        process_stargazer(stargazer, lock)
+        process_stargazers([stargazer], lock)
     else:
         print(f"No stargazer found with login: {login}")
 
