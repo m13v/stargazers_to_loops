@@ -1,0 +1,25 @@
+[
+    {
+        "login": "daisseur",
+        "id": 100715068,
+        "node_id": "U_kgDOBgDKPA",
+        "avatar_url": "https://avatars.githubusercontent.com/u/100715068?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/daisseur",
+        "html_url": "https://github.com/daisseur",
+        "followers_url": "https://api.github.com/users/daisseur/followers",
+        "following_url": "https://api.github.com/users/daisseur/following{/other_user}",
+        "gists_url": "https://api.github.com/users/daisseur/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/daisseur/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/daisseur/subscriptions",
+        "organizations_url": "https://api.github.com/users/daisseur/orgs",
+        "repos_url": "https://api.github.com/users/daisseur/repos",
+        "events_url": "https://api.github.com/users/daisseur/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/daisseur/received_events",
+        "type": "User",
+        "site_admin": false,
+        "email": null,
+        "name": "daisseur",
+        "loops": "no valid email exist"
+    }
+]
