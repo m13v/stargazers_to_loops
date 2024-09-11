@@ -34,7 +34,7 @@ def main():
                 stargazers = json.load(infile)
         
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = {executor.submit(process_stargazer, stargazer, lock): stargazer for stargazer in stargazers}
+            futures = {executor.submit(process_stargazers, [stargazer], lock): stargazer for stargazer in stargazers}
             for future in as_completed(futures):
                 stargazer = futures[future]
                 try:
