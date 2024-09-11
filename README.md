@@ -37,10 +37,6 @@ pip install -r requirements.txt
 ````bash
 python main.py
 ````
-[optionally] you can run script for a specific user: e.g. 
-````bash
-python main.py m13v
-````
 
 ## Example json stats
 ````bash
