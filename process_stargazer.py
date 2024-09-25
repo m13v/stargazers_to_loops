@@ -15,7 +15,7 @@ def process_stargazers(stargazers, lock):
             try:
                 with open('stargazers.json', 'w') as outfile:
                     json.dump(stargazers, outfile, indent=4)
-                logging.info("Updated stargazers.json after processing")
+                # logging.info("Updated stargazers.json after processing")
             except Exception as e:
                 logging.error(f"Error saving stargazers.json: {e}")
 
@@ -52,7 +52,7 @@ def process_single_stargazer(stargazer):
                     logging.info(f"User with email {user_info['email']} already exists in Loops")
             else:
                 stargazer["loops"] = "no valid email exist"
-                logging.warning("User does not have a valid email, skipping loops addition")
+                # logging.warning("User does not have a valid email, skipping loops addition")
             return True
     else:
         logging.error(f"Error fetching user data for {stargazer['login']}: {user_response.status_code}: {user_response.text}")
