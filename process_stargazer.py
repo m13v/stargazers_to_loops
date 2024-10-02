@@ -13,11 +13,26 @@ def process_stargazers(stargazers, lock):
     if updated:
         with lock:
             try:
+                # Read the existing data
+                with open('stargazers.json', 'r') as infile:
+                    existing_data = json.load(infile)
+                
+                # Update the existing data with new information
+                for stargazer in stargazers:
+                    existing_stargazer = next((s for s in existing_data if s['id'] == stargazer['id']), None)
+                    if existing_stargazer:
+                        existing_stargazer.update(stargazer)
+                    else:
+                        existing_data.append(stargazer)
+                
+                # Write the updated data back to the file
                 with open('stargazers.json', 'w') as outfile:
-                    json.dump(stargazers, outfile, indent=4)
-                # logging.info("Updated stargazers.json after processing")
+                    json.dump(existing_data, outfile, indent=4)
+                logging.info("Updated stargazers.json after processing")
             except Exception as e:
-                logging.error(f"Error saving stargazers.json: {e}")
+                logging.error(f"Error updating stargazers.json: {e}")
+    
+    return updated
 
 def process_single_stargazer(stargazer):
     # Check if the loops field indicates the user has already been processed
@@ -40,7 +55,7 @@ def process_single_stargazer(stargazer):
             "name": user_data.get("name"),
             "login": user_data.get("login")
         }
-        logging.info(f"User info: {user_info}")
+        # logging.info(f"User info: {user_info}")
         if user_info["url"]:
             stargazer.update(user_info)
             if user_info["email"]:
