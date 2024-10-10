@@ -14,9 +14,10 @@ def add_to_loops(user):
         "firstName": user["name"].split()[0] if user["name"] else "",
         "lastName": " ".join(user["name"].split()[1:]) if user["name"] else "",
         "source": "GitHub Stargazer",
-        "userGroup": "screen-pipe-stargazers"
+        "userGroup": "non-newsletter-stargazers",
+        "subscribed": False  # Add this line to set the user as not subscribed
     }
-    logging.info(f"Adding {user['email']} to Loops")
+    logging.info(f"adding {user['email']} to loops as not subscribed")
     
     session = requests.Session()
     retry = Retry(
