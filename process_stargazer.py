@@ -6,9 +6,15 @@ from add_to_loops import add_to_loops, check_user_existence_by_email
 
 def process_stargazers(stargazers, lock):
     updated = False
+    processed_count = 0
     for stargazer in stargazers:
-        if process_single_stargazer(stargazer):
+        if stargazer.get("loops") in ["added", "already in loops", "no valid email exist"]:
+            processed_count += 1
+            continue
+        result = process_single_stargazer(stargazer)
+        if result:
             updated = True
+            processed_count += 1
     
     if updated:
         with lock:
@@ -28,11 +34,11 @@ def process_stargazers(stargazers, lock):
                 # Write the updated data back to the file
                 with open('stargazers.json', 'w') as outfile:
                     json.dump(existing_data, outfile, indent=4)
-                logging.info("Updated stargazers.json after processing")
+                logging.info("updated stargazers.json after processing")
             except Exception as e:
-                logging.error(f"Error updating stargazers.json: {e}")
+                logging.error(f"error updating stargazers.json: {e}")
     
-    return updated
+    return processed_count
 
 def process_single_stargazer(stargazer):
     # Check if the loops field indicates the user has already been processed
