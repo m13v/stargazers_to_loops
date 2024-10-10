@@ -8,6 +8,15 @@ from process_stargazer import process_stargazers
 from get_stargazers import get_stargazers
 from fix_and_validate_json import validate_json, fix_json_syntax
 
+def merge_stargazers(existing, new):
+    merged = {s['id']: s for s in existing}
+    for stargazer in new:
+        if stargazer['id'] not in merged:
+            merged[stargazer['id']] = stargazer
+        else:
+            merged[stargazer['id']].update(stargazer)
+    return list(merged.values())
+
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     lock = Lock()  # Create a lock for thread-safe file writing
@@ -16,41 +25,43 @@ def main():
         print("Usage: python main.py [login1] [login2] ...")
         print("No login provided, fetching all stargazers...")
         
-        # Check if stargazers.json exists
-        if not os.path.exists('stargazers.json'):
-            logging.info("stargazers.json not found. Fetching stargazers...")
-            stargazers = get_stargazers()
-            if not stargazers:
-                return
+        # Always fetch new stargazers
+        logging.info("fetching new stargazers...")
+        new_stargazers = get_stargazers()
+        
+        if os.path.exists('stargazers.json'):
+            logging.info("merging with existing stargazers...")
+            if validate_json('stargazers.json'):
+                with open('stargazers.json', 'r') as infile:
+                    existing_stargazers = json.load(infile)
+                stargazers = merge_stargazers(existing_stargazers, new_stargazers)
+            else:
+                logging.warning("existing stargazers.json is invalid, using only new data")
+                stargazers = new_stargazers
         else:
-            logging.info("Calling validate_json for stargazers.json")
-            if not validate_json('stargazers.json'):
-                logging.info("Attempting to fix JSON syntax issues...")
-                fix_json_syntax('stargazers.json')
-                if not validate_json('stargazers.json'):
-                    return
-            
-            with open('stargazers.json', 'r') as infile:
-                stargazers = json.load(infile)
+            stargazers = new_stargazers
+        
+        # Save merged stargazers
+        with open('stargazers.json', 'w') as outfile:
+            json.dump(stargazers, outfile, indent=4)
         
         total_stargazers = len(stargazers)
         successful = 0
         failed = 0
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            chunk_size = len(stargazers) // 10  # Divide stargazers into 10 chunks
-            stargazer_chunks = [stargazers[i:i + chunk_size] for i in range(0, len(stargazers), chunk_size)]
+            stargazers_to_process = [s for s in stargazers if s.get("loops") not in ["added", "already in loops", "no valid email exist"]]
+            chunk_size = len(stargazers_to_process) // 10  # Divide stargazers into 10 chunks
+            stargazer_chunks = [stargazers_to_process[i:i + chunk_size] for i in range(0, len(stargazers_to_process), chunk_size)]
             futures = {executor.submit(process_stargazers, chunk, lock): chunk for chunk in stargazer_chunks}
             for future in as_completed(futures):
                 chunk = futures[future]
                 try:
-                    result = future.result()
-                    if result:
-                        successful += len(chunk)
-                    else:
-                        failed += len(chunk)
+                    processed = future.result()
+                    successful += processed
+                    failed += len(chunk) - processed
                 except Exception as e:
-                    logging.error(f"Error processing chunk of stargazers: {e}")
+                    logging.error(f"error processing chunk of stargazers: {e}")
                     failed += len(chunk)
 
         logging.info(f"processing completed. total: {total_stargazers}, successful: {successful}, failed: {failed}")
